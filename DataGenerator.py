@@ -26,7 +26,7 @@ class DataGenerator(keras.utils.Sequence):
 
     def __len__(self):
         """Denotes the number of batches per epoch"""
-        num_batches = self.df.shape[0] // self.batch_size + (self.df.shape[0] % self.batch_size > 0)
+        num_batches = int(np.floor(self.n_files/self.batch_size))
         
         return num_batches
 
