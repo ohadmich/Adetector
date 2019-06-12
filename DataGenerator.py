@@ -79,7 +79,7 @@ class DataGenerator(keras.utils.Sequence):
                 
 class DataGenerator_Sup(keras.utils.Sequence):
     """Generate data for supervised learning"""
-    def __init__(self, pos_files, neg_files = None, batch_size=10, sample_duration = 3, dataset='train', shuffle=True):
+    def __init__(self, pos_files, neg_files, batch_size=10, sample_duration = 3, dataset='train', shuffle=True):
         """
         * pos_files: a list of paths for positive audio files (Ads)
         * neg_files: a list of paths for negative audio files (non Ads)
@@ -97,8 +97,17 @@ class DataGenerator_Sup(keras.utils.Sequence):
         self.sr = 22050 # audio sampling rate
         self.n_mfcc = 13 # number of frequency coefficients to use
         self.d = sample_duration
-        self.on_epoch_end()
         self.err_files = []
+        self.files = []
+        
+        '''Unify all files and add labels'''
+        for f in pos_files:
+            self.files.append([f,1])
+        for f in neg_files:
+            self.files.append([f,0])
+        
+        # shuffle files    
+        self.on_epoch_end()
 
     def __len__(self):
         """Denotes the number of batches per epoch"""
@@ -112,31 +121,39 @@ class DataGenerator_Sup(keras.utils.Sequence):
         end_index = (index+1) * self.batch_size
         if end_index > self.n_files:
             end_index = None
-        batch_files = self.pos_files[start_index:end_index]
+        
+        batch_files = []
+        labels = []
+        for i in range(start_index,end_index):
+            batch_files.append(self.files[i][0])
+            labels.append(self.files[i][1])
+            
+        X, Y = self.__data_generation(batch_files, labels)
 
-        X = self.__data_generation(batch_files)
+        return X, Y
 
-        return X
-
-    def __data_generation(self, batch_files):
+    def __data_generation(self, batch_files, labels):
         """Generate a data batch"""
         X = []
-        clip_list = self.load_clips(batch_files)
+        Y = []
+        clip_list = self.load_clips(batch_files, labels)
         np.random.shuffle(clip_list) # randomize clips (many of them come from the same file)
         for clip in clip_list:
-            features = librosa.feature.mfcc(clip, sr=self.sr, n_mfcc=self.n_mfcc, dct_type=2)
+            features = librosa.feature.mfcc(clip[0], sr=self.sr, n_mfcc=self.n_mfcc, dct_type=2)
             X.append(features.flatten())
+            Y.append(clip[1])
             
-        return np.vstack(X)
+        return np.vstack(X), np.vstack(Y)
     
-    def load_clips(self, filepath_list):
+    def load_clips(self, filepath_list, labels):
         '''Loads files in filepath_list, cuts them to clips of length
            d and returns a list of all the clips'''
         clip_list = []
         # load all files in filepath_list
-        for f in filepath_list:
+        for i,f in enumerate(filepath_list):
             try:
                 audio = librosa.core.load(f, sr = self.sr)[0]
+                label = labels[i]
             except:
                 self.err_files.append(f)
                 continue
@@ -144,11 +161,11 @@ class DataGenerator_Sup(keras.utils.Sequence):
             audio_length = len(audio)/self.sr # in sec
             n_clips = int(np.floor(audio_length/self.d)) # full clips in audio
             for i in range(n_clips):
-                clip_list.append(audio[i*self.d*self.sr:(i+1)*self.d*self.sr])          
+                clip_list.append([audio[i*self.d*self.sr:(i+1)*self.d*self.sr], label])
 
         return clip_list
     
     def on_epoch_end(self):
             """Update indexes after each epoch"""
             if self.shuffle:
-                np.random.shuffle(self.pos_files)
+                np.random.shuffle(self.files)
