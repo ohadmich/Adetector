@@ -99,6 +99,8 @@ class DataGenerator_Sup(keras.utils.Sequence):
         self.d = sample_duration
         self.err_files = []
         self.files = []
+        self.mu = 0
+        self.std = 0
         
         '''Unify all files and add labels'''
         for f in pos_files:
@@ -129,6 +131,10 @@ class DataGenerator_Sup(keras.utils.Sequence):
             labels.append(self.files[i][1])
             
         X, Y = self.__data_generation(batch_files, labels)
+        '''Normalization'''
+        self.mu = np.mean(X, axis=0) 
+        self.std = np.std(X, axis=0)
+        X = (X-self.mu)/self.std
 
         return X, Y
 
