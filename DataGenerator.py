@@ -79,10 +79,10 @@ class DataGenerator(keras.utils.Sequence):
                 
 class DataGenerator_Sup(keras.utils.Sequence):
     """Generate data for supervised learning"""
-    def __init__(self, pos_files, neg_files, batch_size=10, sample_duration = 3, dataset='train', shuffle=True):
+    def __init__(self, files, batch_size=10, sample_duration = 3, dataset='train', shuffle=True):
         """
-        * pos_files: a list of paths for positive audio files (Ads)
-        * neg_files: a list of paths for negative audio files (non Ads)
+        * files: a list of data files in which each element contains a list of the form [path, label]
+          where label is denoted 1 for Ads and 0 for Non Ads
         * batch_size: batch sample of each iteration
         * sample_duration: standard sample duration in the data set
         * dataset: use to label the dataset of the current generator
@@ -91,29 +91,21 @@ class DataGenerator_Sup(keras.utils.Sequence):
         self.batch_size = batch_size
         self.dataset = dataset
         self.shuffle = shuffle
-        self.pos_files = pos_files
-        self.neg_files = neg_files
-        self.n_files = len(self.pos_files) + len(self.neg_files)
+        self.files = files
+        self.n_files = len(files)
         self.sr = 22050 # audio sampling rate
         self.n_mfcc = 13 # number of frequency coefficients to use
         self.d = sample_duration
         self.err_files = []
-        self.files = []
         self.mu = 0
         self.std = 0
-        
-        '''Unify all files and add labels'''
-        for f in pos_files:
-            self.files.append([f,1])
-        for f in neg_files:
-            self.files.append([f,0])
         
         # shuffle files    
         self.on_epoch_end()
 
     def __len__(self):
         """Denotes the number of batches per epoch"""
-        num_batches = int(np.floor(self.n_files/self.batch_size))
+        num_batches = int(self.n_files/self.batch_size)
         
         return num_batches
 
