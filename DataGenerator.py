@@ -79,7 +79,7 @@ class DataGenerator(keras.utils.Sequence):
                 
 class DataGenerator_Sup(keras.utils.Sequence):
     """Generate data for supervised learning"""
-    def __init__(self, files, batch_size=10, sample_duration = 3, dataset='train', shuffle=True):
+    def __init__(self, files, batch_size=10, sample_duration = 3, dataset='train', shuffle=True, CNN = False):
         """
         * files: a list of data files in which each element contains a list of the form [path, label]
           where label is denoted 1 for Ads and 0 for Non Ads
@@ -87,10 +87,12 @@ class DataGenerator_Sup(keras.utils.Sequence):
         * sample_duration: standard sample duration in the data set
         * dataset: use to label the dataset of the current generator
         * shuffle: whether or not shuffle the dataframe before itering over it. Default True!
+        * CNN: Outputs X in shape (n_samples, n_mfcc, n_timebins) when True for training CNN models
         """
         self.batch_size = batch_size
         self.dataset = dataset
         self.shuffle = shuffle
+        self.CNN = CNN
         self.files = files
         self.n_files = len(files)
         self.sr = 22050 # audio sampling rate
@@ -138,10 +140,14 @@ class DataGenerator_Sup(keras.utils.Sequence):
         np.random.shuffle(clip_list) # randomize clips (many of them come from the same file)
         for clip in clip_list:
             features = librosa.feature.mfcc(clip[0], sr=self.sr, n_mfcc=self.n_mfcc, dct_type=2)
-            X.append(features.flatten())
             Y.append(clip[1])
             
-        return np.vstack(X), np.vstack(Y)
+            if self.CNN:
+                X.append(features)
+            else:        
+                X.append(features.flatten())
+            
+        return np.array(X), np.vstack(Y)
     
     def load_clips(self, filepath_list, labels):
         '''Loads files in filepath_list, cuts them to clips of length
