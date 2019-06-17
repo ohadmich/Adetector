@@ -129,7 +129,11 @@ class DataGenerator_Sup(keras.utils.Sequence):
         self.mu = np.mean(X, axis=0) 
         self.std = np.std(X, axis=0)
         X = (X-self.mu)/self.std
-
+        
+        # reshape X for CNN models as an image with one channel
+        if self.CNN:
+            X = X.reshape((X.shape[0],X.shape[1], X.shape[2], 1))
+        
         return X, Y
 
     def __data_generation(self, batch_files, labels):
