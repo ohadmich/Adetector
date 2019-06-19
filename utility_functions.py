@@ -26,7 +26,7 @@ def create_model(n_features = 1690):
     model.summary()
     return model
 
-def create_CNN_model(n_mfcc = 13, n_timebins = 130):
+def create_CNN_model(n_mfcc = 13, n_timebins = 130, quiet = False):
     '''Create a model obejct with a 2D input of shape (n_mfcc, n_timebins,1)'''
     model = Sequential() # create a model instance
 
@@ -38,7 +38,9 @@ def create_CNN_model(n_mfcc = 13, n_timebins = 130):
     model.add(Dense(32, activation = 'relu'))
     model.add(Dense(1, activation = 'sigmoid'))
     
-    model.summary()
+    if not quiet:
+        model.summary()
+    
     return model
 
 def audio2features_vectors(file_path, clip_duration = 3, sr = 22050, n_mfcc = 13, CNN=False):
