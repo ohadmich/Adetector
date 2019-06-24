@@ -193,9 +193,14 @@ def get_timestamps(prob_over_time, T=0.85, n=10, show = False, d=3):
     # compute probabilities based on music vs ad classifier
     music_vs_ads_probs =[]
     for i in range(timestamps.shape[0]):
-        S_idx = np.argmin((t-timestamps[i][0])**2)+1 # start index
+        # handle left boundary case - no start detection
+        if timestamps[i][0] == 0:
+            S_idx = 0
+        else:
+            S_idx = np.argmin((t-timestamps[i][0])**2)+1 # start index
         E_idx = np.argmin((t-timestamps[i][1])**2)+1 # end index
         prob = np.mean(prob_over_time[S_idx:E_idx])
+        # import pdb; pdb.set_trace()
         music_vs_ads_probs.append(prob)
     
     # if show is set to true, plot ad probability over time and threshold
