@@ -8,15 +8,16 @@ from keras.callbacks import ModelCheckpoint
 
 import utils
 
-def find_ads(X, T=0.85, d=3, n=10, show = False):
+def find_ads(X, T=0.85, n=10, show = False, d=3):
     '''Returns timestamps and probabilities for all ads found in feature array X
        inputs:
        ------ 
        X - feature array prepared out of an audio file using audio2features
        T - a probability threshold for detection 
-       d - ***must match the value of clip_duration used in audio2features***
        n - moving average window size, used for smoothing prob. vector before detection
        show - when set to be true, shows a plot of ad probability over time
+       d - ***must match the value of clip_duration used in audio2features
+              DO NOT MODIFY IF MODEL WAS NOT RETRAINED WITH THE NEW VALUES***
        outputs:
        -------
        timestamps - a 2D array of with the detected timestamps - shape: (n_detections, 2)
@@ -60,25 +61,35 @@ def create_NN_model(n_features = 1690):
     return model
 
 
-def audio2features(file_path, clip_duration = 3, sr = 22050,
-                   n_mfcc = 13, offset = 0.0, max_duration = 20, CNN=True):
+def audio2features(file_path, offset = 0.0, max_duration = 20, CNN=True,
+                   clip_duration = 3, sr = 22050, n_mfcc = 13):
     ''' Prepares an array of features to which are used as an input to a model
         for prediction. The entire file is devided into short clips, features are
         extracted from each clip using mfccs and then normalized  
         inputs:
         ------
         file_path - a path to a radio stream audio file
+        offset - load audio with offset from start time, shoud be in minutes!
+        max_duration - maximal duration to load into memory, should be in minutes!
+        CNN - true for inputing features to a CNN model
+        ***Warnning***
+        DO NOT MODIFY THE INPUTS BELOW IF MODEL WAS NOT RETRAINED WITH THE NEW VALUES
+        Current models support only the default values!!
+        **************
         clip_duration - time in seconds of the timeframe which is used for extracting
-                        features. ***Current models work only with the default value!!***
-        
-    
-    Takes a path to an audio file, cuts it to clip_duration windows,
-       extracts features, normalizes and outputs a np.array of shape (n_clips, n_features)
-       CNN flag is used for reshaping data for inputing to a CNN
-       * max_duration - maximum duration to load from file in minutes'''
+                        features. 
+        sr - sampling rate of the audio file 
+        n_mfcc - number of mfc coefficients used in when extracting features
+
+        outputs:
+        -------
+        X - an array of normalized features, in shape:
+            *(n_clips, n_features,) for NN (when CNN is False)
+            *(n_clips, n_mfcc, n_timebins, 1) for CNN (when CNN is True)
+    '''
     features_vec = []
     # load audio
-    audio = librosa.core.load(file_path, sr = sr, offset = offset,
+    audio = librosa.core.load(file_path, sr = sr, offset = offset*60,
                               duration = max_duration*60)[0]
     audio_length = len(audio)/sr # in sec
     n_clips = int(np.floor(audio_length/clip_duration)) # full clips in audio
