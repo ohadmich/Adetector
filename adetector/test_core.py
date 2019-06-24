@@ -60,6 +60,8 @@ class TestCore(unittest.TestCase):
         right_detection, right_probs = core.get_timestamps(right_signal, n=1)
         self.assertTrue(np.allclose(left_detection, np.array([[0, 3*self.d/60]])))
         self.assertTrue(np.allclose(right_detection, np.array([[4*self.d/60, 9*self.d/60]])))
+        self.assertAlmostEqual(left_probs[0][0], (0.98+0.95+0.92)/3)
+        self.assertAlmostEqual(right_probs[0][0], (0.92+0.96+0.98+0.95+0.92)/5)
         
 
 if __name__ == '__main__':
