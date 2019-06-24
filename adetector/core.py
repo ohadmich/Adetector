@@ -26,7 +26,7 @@ def find_ads(X, T=0.85, n=10, show = False, d=3):
     '''
     
     prob_over_time = Ad_vs_music_classifier(X)
-    timestamps, probs = get_timestamps(prob_over_time, T, d, n, show)
+    timestamps, probs = get_timestamps(prob_over_time, T, n, show, d)
     probs = Ad_vs_speech_classifier(X, timestamps, probs)
 
     return timestamps, probs
@@ -115,7 +115,14 @@ def audio2features(file_path, offset = 0.0, max_duration = 20, CNN=True,
 
 def Ad_vs_music_classifier(X):
     '''Returns a vector of Ad probabilities for each point in time
-       based on a model trained to differentiate between ads and music'''
+       based on a model trained to differentiate between ads and music
+       inputs:
+       ------
+       X - an array of features in shape: (n_clips, n_mfcc, n_timebins, 1)
+       outputs:
+       -------
+       prob_over_time - a vector of probability in each clip, shape (n_clips,)
+    '''
     # choose model's weights
     weights_path = 'models/weights_LeNet5ish_1000_only_music_and_ads_10epochs.hdf5'
     # create a model for evaluation
@@ -129,9 +136,24 @@ def Ad_vs_music_classifier(X):
 
     return prob_over_time
 
-def get_timestamps(prob_over_time, T=0.85, d=3, n=10, show = False):
-    '''Takes an Ad probability vector, a threshold and time bin size
-       and returns start and end timestamps'''
+def get_timestamps(prob_over_time, T=0.85, n=10, show = False, d=3):
+    '''Takes a probility over time and extracts timestamps of detected ads
+       inputs:
+       ------
+       prob_over_time - a vector of ad probabilities for every clip.
+       T - a probability threshold for detection 
+       n - moving average window size, used for smoothing prob. vector before detection
+       show - when set to be true, shows a plot of ad probability over time
+       d - ***must match the value of clip_duration used in audio2features
+              DO NOT MODIFY IF MODEL WAS NOT RETRAINED WITH THE NEW VALUES***
+
+       outputs:
+       -------
+       timestamps - a 2D array of with the detected timestamps - shape: (n_detections, 2)
+       probs - a vector of ad probabilities for each detection, calculated only
+               based on music vs. ad classifier (gives high probability for speech),
+               shape: (n_detection,) 
+    '''
     # smoothing and creating a time axis
     prob_over_time_smooth = utils.moving_average(prob_over_time, n) # smoothing 
     t = np.arange(len(prob_over_time))*d/60.0 # create time axis
@@ -186,7 +208,18 @@ def get_timestamps(prob_over_time, T=0.85, d=3, n=10, show = False):
     return timestamps, np.vstack(music_vs_ads_probs)
 
 def extract_timeframe_data(X, start_time, end_time, d=3):
-    '''Returns the part of X which is in the defined timeframe'''
+    '''Returns the part of X which is in the defined timeframe
+       inputs:
+       ------
+       X - an array of features in shape: (n_clips, n_mfcc, n_timebins, 1)
+       start_time - start of time frame in minutes
+       end_time - end of time frame in minutes
+       d - ***must match the value of clip_duration used in audio2features
+              DO NOT MODIFY IF MODEL WAS NOT RETRAINED WITH THE NEW VALUES***
+       outputs:
+       -------
+       X[S_idx:E_idx] - the part of X in the desired time frame
+    '''
     t = np.arange(X.shape[0])*d/60.0 # create time axis
     S_idx = np.argmin((t-start_time)**2) # start index
     E_idx = np.argmin((t-end_time)**2) # end index
@@ -194,7 +227,20 @@ def extract_timeframe_data(X, start_time, end_time, d=3):
     return X[S_idx:E_idx]
 
 def Ad_vs_speech_classifier(X, timestamps, probs):
-    '''Returns ad probability vector after applying ad vs speech classification'''
+    '''Returns ad probability vector after applying ad vs speech classification
+       inputs:
+       ------
+       X - an array of features in shape: (n_clips, n_mfcc, n_timebins, 1)
+       timestamps - a 2D array of with the detected timestamps - shape: (n_detections, 2)
+       probs - a vector of ad probabilities for each detection, calculated only
+               based on music vs. ad classifier (gives high probability for speech),
+               shape: (n_detection,)
+       outputs:
+       -------
+       probs - probability of vector of shape (len(timestamps),) containing
+               the probability of each timestamp being an ad based on a model
+               trained to differentiate between ads and podcasts
+    '''
     
     # choose model's weights
     weights_path = 'models/weights_LeNet5ish_1000_only_podcasts_and_ads_6epochs.hdf5'
