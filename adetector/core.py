@@ -160,30 +160,41 @@ def get_timestamps(prob_over_time, T=0.85, n=10, show = False, d=3):
     '''
     # smoothing and creating a time axis
     prob_over_time_smooth = utils.moving_average(prob_over_time, n) # smoothing 
-    t = np.arange(len(prob_over_time))*d/60.0 # create time axis
+    t = np.arange(1,len(prob_over_time)+1)*d/60.0 # create time axis
     t_smooth = utils.moving_average(t, n)
     
     # thresholding for detection and extracting start and end times
     detection_domains = (prob_over_time_smooth>T).astype(int) # get 1s for every detection
     transitions = np.diff(detection_domains) # get transitions between ads and non ads
     
-    start_times = t_smooth[:-1][transitions == 1] + d/60 # ad starts when prob. goes 0 -> 1
-    end_times = t_smooth[:-1][transitions == -1] + d/60# ad ends when prob. goes 1 -> 0
+    start_times = t_smooth[:-1][transitions == 1] # ad starts when prob. goes 0 -> 1
+    end_times = t_smooth[:-1][transitions == -1] # ad ends when prob. goes 1 -> 0
     
-    # if the first event is an end - add a start event at time 0
-    if np.min(end_times) < np.min(start_times):
-        start_times = np.hstack([0,start_times])
-    # if the last event is a start - add an end event at the end of the audio
-    if np.max(end_times) < np.max(start_times):
-        end_times = np.hstack([end_times, t_smooth[-1]])
+    # if no signal was detected, return 0
+    if start_times.size == 0 and end_times.size == 0:
+        return 0, 0
+    # if only start time was detected, add the last time frame as end time
+    elif end_times.size == 0:
+        end_times = np.array([t_smooth[-1]])
+    # if only end time was detected, add 0 as a start time
+    elif start_times.size == 0:
+        start_times = np.array([0])
+    # otherwise check boundary conditions for the detection 
+    else:
+        # if the first event is an end - add a start event at time 0
+        if np.min(end_times) < np.min(start_times):
+            start_times = np.hstack([0,start_times])
+        # if the last event is a start - add an end event at the end of the audio
+        if np.max(end_times) < np.max(start_times):
+            end_times = np.hstack([end_times, t_smooth[-1]])
     
     timestamps = np.vstack([start_times, end_times]).transpose()
     
     # compute probabilities based on music vs ad classifier
     music_vs_ads_probs =[]
     for i in range(timestamps.shape[0]):
-        S_idx = np.argmin((t-timestamps[i][0])**2) # start index
-        E_idx = np.argmin((t-timestamps[i][1])**2) # end index
+        S_idx = np.argmin((t-timestamps[i][0])**2)+1 # start index
+        E_idx = np.argmin((t-timestamps[i][1])**2)+1 # end index
         prob = np.mean(prob_over_time[S_idx:E_idx])
         music_vs_ads_probs.append(prob)
     
