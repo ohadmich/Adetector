@@ -10,7 +10,7 @@ import utils
 '''
 radio_stream_path =  '../Data/sample_audio.wav'
 X = core.audio2features(radio_stream_path)
-timestamps, probs = core.find_ads(X, T=0.95, n=1, show=True)
+timestamps, probs = core.find_ads(X, T=0.96, n=1, show=True)
 
 print("Ads were detected at the following timestamps:")
 print(timestamps)
