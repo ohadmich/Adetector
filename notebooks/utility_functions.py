@@ -9,7 +9,6 @@ import keras
 from keras.models import Sequential
 from keras.layers import Dense, Conv2D, Flatten
 from keras.callbacks import ModelCheckpoint
-from DataGenerator import DataGenerator_Sup
 from sklearn.metrics import confusion_matrix
 
 """This is a collection of utility functions used across the project"""
