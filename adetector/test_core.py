@@ -7,7 +7,7 @@ class TestCore(unittest.TestCase):
     
     def setUp(self):
         self.audio_path = '../Data/sample_audio.wav'
-        self.audio_length = 27 # sample_audio.wav's length in seconds
+        self.audio_length = 26 # sample_audio.wav's length in seconds
         self.d = 3 # default clip_duration in seconds
         self.n_mfcc = 13 # default number of mfc coeficients
         self.n_timebins = 130 # default timebins in each clip
@@ -16,7 +16,7 @@ class TestCore(unittest.TestCase):
 
     def test_audio2features_output_shape(self):
         X = core.audio2features(self.audio_path)
-        self.assertAlmostEqual(X.shape[0], self.audio_length/self.d)
+        self.assertAlmostEqual(X.shape[0], int(self.audio_length/self.d))
         self.assertAlmostEqual(X.shape[1], self.n_mfcc)
         self.assertAlmostEqual(X.shape[2], self.n_timebins)
         self.assertAlmostEqual(X.shape[3],1) # X has only one channel
