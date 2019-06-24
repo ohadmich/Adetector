@@ -1,3 +1,7 @@
+"""
+This file contains all the functions needed for applying the detection algorithm
+on an audio file. 
+"""
 import numpy as np
 import matplotlib.pyplot as plt
 import librosa
