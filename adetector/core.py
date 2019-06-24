@@ -193,14 +193,9 @@ def get_timestamps(prob_over_time, T=0.85, n=10, show = False, d=3):
     # compute probabilities based on music vs ad classifier
     music_vs_ads_probs =[]
     for i in range(timestamps.shape[0]):
-        # handle left boundary case - no start detection
-        if timestamps[i][0] == 0:
-            S_idx = 0
-        else:
-            S_idx = np.argmin((t-timestamps[i][0])**2)+1 # start index
-        E_idx = np.argmin((t-timestamps[i][1])**2)+1 # end index
+        S_idx, E_idx = extract_timeframe_indices(t, timestamps[i][0], timestamps[i][1])
         prob = np.mean(prob_over_time[S_idx:E_idx])
-        # import pdb; pdb.set_trace()
+
         music_vs_ads_probs.append(prob)
     
     # if show is set to true, plot ad probability over time and threshold
@@ -227,26 +222,28 @@ def get_timestamps(prob_over_time, T=0.85, n=10, show = False, d=3):
 
     return timestamps, np.vstack(music_vs_ads_probs)
 
-def extract_timeframe_data(X, start_time, end_time, d=3):
-    '''Returns the part of X which is in the defined timeframe
+def extract_timeframe_indices(t, start_time, end_time):
+    '''Returns the indices of a timeframe starting at start_time and ending and end_time
        inputs:
        ------
-       X - an array of features in shape: (n_clips, n_mfcc, n_timebins, 1)
+       t - a time vector in minutes, shape: (n_clips, 1)
        start_time - start of time frame in minutes
        end_time - end of time frame in minutes
-       d - ***must match the value of clip_duration used in audio2features
-              DO NOT MODIFY IF MODEL WAS NOT RETRAINED WITH THE NEW VALUES***
        outputs:
        -------
-       X[S_idx:E_idx] - the part of X in the desired time frame
+       S_idx - start index of the time frame
+       E_idx - end index of the time frame
     '''
-    t = np.arange(X.shape[0])*d/60.0 # create time axis
-    S_idx = np.argmin((t-start_time)**2) # start index
-    E_idx = np.argmin((t-end_time)**2) # end index
+    # handle left boundary case - no start detection
+    if start_time == 0:
+        S_idx = 0
+    else:
+        S_idx = np.argmin((t-start_time)**2) +1 # start index
+    E_idx = np.argmin((t-end_time)**2) +1 # end index
 
-    return X[S_idx:E_idx]
+    return S_idx, E_idx
 
-def Ad_vs_speech_classifier(X, timestamps, probs):
+def Ad_vs_speech_classifier(X, timestamps, probs, d=3):
     '''Returns ad probability vector after applying ad vs speech classification
        inputs:
        ------
@@ -255,6 +252,8 @@ def Ad_vs_speech_classifier(X, timestamps, probs):
        probs - a vector of ad probabilities for each detection, calculated only
                based on music vs. ad classifier (gives high probability for speech),
                shape: (n_detection,)
+       d - ***must match the value of clip_duration used in audio2features
+              DO NOT MODIFY IF MODEL WAS NOT RETRAINED WITH THE NEW VALUES***
        outputs:
        -------
        probs - probability of vector of shape (len(timestamps),) containing
@@ -270,9 +269,11 @@ def Ad_vs_speech_classifier(X, timestamps, probs):
     speech_model.load_weights(weights_path)
     # compile
     speech_model.compile(loss='binary_crossentropy', optimizer='adam', metrics=['accuracy'])
-    
+
+    t = np.arange(1,X.shape[0]+1)*d/60.0 # create time axis
     for i in range(timestamps.shape[0]):
-        X_p = extract_timeframe_data(X, timestamps[i][0], timestamps[i][1])
+        S_idx, E_idx = extract_timeframe_indices(t, timestamps[i][0], timestamps[i][1])
+        X_p = X[S_idx:E_idx]
         Ad_prob = speech_model.predict(X_p)
         probs[i] = probs[i] * np.mean(Ad_prob)
         
