@@ -52,19 +52,6 @@ def create_CNN_model(n_mfcc = 13, n_timebins = 130, quiet = False):
     
     return model
 
-def create_NN_model(n_features = 1690):
-    '''Creates a model obejct with an input of length n_features'''
-    model = Sequential() # create a model instance
-
-    #add model layers
-    model.add(Dense(256, activation = 'relu', input_shape=(n_features,)))
-    model.add(Dense(64, activation = 'relu'))
-    model.add(Dense(1, activation = 'sigmoid'))
-    
-    model.summary()
-    return model
-
-
 def audio2features(file_path, offset = 0.0, max_duration = 20, CNN=True,
                    clip_duration = 3, sr = 22050, n_mfcc = 13):
     ''' Prepares an array of features to which are used as an input to a model
