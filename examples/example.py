@@ -16,5 +16,3 @@ print("Ads were detected at the following timestamps:")
 print(timestamps)
 print("Ad probabilities for these timestamps are:")
 print(probs)
-
-utils.listen_to(radio_stream_path, *timestamps[1])

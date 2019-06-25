@@ -3,17 +3,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import librosa
 import librosa.display
-import IPython.display as ipd
 from sklearn.metrics import confusion_matrix
-
-def listen_to(file_path, start_time, end_time, sr=22050):
-    '''Plays a part of audio file file_path, that starts at start_time
-       and ends at end_time where start and end are given in minutes'''
-    start_time_sec = start_time*60
-    end_time_sec = end_time*60
-    duration = end_time_sec - start_time_sec
-    audio = librosa.core.load(file_path, sr = sr, offset = start_time_sec, duration = duration)[0]
-    return ipd.Audio(audio, rate = sr)
 
 def moving_average(a, n=10) :
     a_padded = np.pad(a, (n//2, n-1 - n//2), mode = 'edge')
