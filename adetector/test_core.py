@@ -13,6 +13,8 @@ class TestCore(unittest.TestCase):
         self.n_timebins = 130 # default timebins in each clip
         self.X_sample = np.load('../Data/X_sample.npy') # a sample X array for testing
         self.prob_over_time_sample = np.array([0.5,0.2,0.8,0.92,0.96,0.99,0.78,0.6,0.2])
+        self.timestamps_sample = np.array([[0., 0.15],[0.3, 0.4]]) # timestamps for sample audio
+        self.probs_sample = np.array([[0.21392338],[0.9058739]]) # ad probabilities of sample audio
 
     def test_audio2features_output_shape(self):
         X = core.audio2features(self.audio_path)
@@ -62,7 +64,24 @@ class TestCore(unittest.TestCase):
         self.assertTrue(np.allclose(right_detection, np.array([[4*self.d/60, 9*self.d/60]])))
         self.assertAlmostEqual(left_probs[0][0], (0.98+0.95+0.92)/3)
         self.assertAlmostEqual(right_probs[0][0], (0.92+0.96+0.98+0.95+0.92)/5)
-        
+    
+    def test_extract_timeframe_indices_outputs(self):
+        t = np.arange(10)*2
+        S_idx, E_idx = core.extract_timeframe_indices(t,10,18)
+        self.assertAlmostEqual(S_idx, 6)
+        self.assertAlmostEqual(E_idx, 10)
+
+    def test_Ad_vs_speech_classifier_output_shape(self):
+        probs = core.Ad_vs_speech_classifier(self.X_sample, self.timestamps_sample,
+                                             np.array([[0.99940175],[0.9953462]]))
+        self.assertAlmostEqual(probs.shape[0],self.probs_sample.shape[0])
+        self.assertAlmostEqual(probs.shape[1],self.probs_sample.shape[1])
+
+    def test_Ad_vs_speech_classifier_output_value(self):
+        probs = core.Ad_vs_speech_classifier(self.X_sample, self.timestamps_sample,
+                                             np.array([[0.99940175],[0.9953462]]))
+        self.assertAlmostEqual(probs[0][0],self.probs_sample[0][0])
+        self.assertAlmostEqual(probs[1][0],self.probs_sample[1][0])       
 
 if __name__ == '__main__':
     unittest.main()
