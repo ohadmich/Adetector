@@ -16,7 +16,8 @@ def listen_to(file_path, start_time, end_time, sr=22050):
     return ipd.Audio(audio, rate = sr)
 
 def moving_average(a, n=10) :
-    ret = np.cumsum(a, dtype=float)
+    a_padded = np.pad(a, (n//2, n-1 - n//2), mode = 'edge')
+    ret = np.cumsum(a_padded, dtype=float)
     ret[n:] = ret[n:] - ret[:-n]
     return ret[n - 1:] / n
 
