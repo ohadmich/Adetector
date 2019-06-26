@@ -2,6 +2,7 @@
 This file contains all the functions needed for applying the detection algorithm
 on an audio file. 
 """
+import os
 import numpy as np
 import matplotlib.pyplot as plt
 import librosa
@@ -10,7 +11,8 @@ from keras.models import Sequential
 from keras.layers import Dense, Conv2D, Flatten
 from keras.callbacks import ModelCheckpoint
 
-import utils
+from . import utils
+from .config import weights_folder
 
 def find_ads(X, T=0.85, n=10, show = False, d=3):
     '''Returns timestamps and probabilities for all ads found in feature array X
@@ -115,7 +117,8 @@ def Ad_vs_music_classifier(X):
        prob_over_time - a vector of probability in each clip, shape (n_clips,)
     '''
     # choose model's weights
-    weights_path = 'models/weights_LeNet5ish_1000_only_music_and_ads_10epochs.hdf5'
+    weights_filename = 'weights_LeNet5ish_1000_only_music_and_ads_10epochs.hdf5'
+    weights_path = os.path.join(weights_folder, weights_filename)
     # create a model for evaluation
     model = create_CNN_model(quiet=True)
     # load weights
@@ -248,7 +251,8 @@ def Ad_vs_speech_classifier(X, timestamps, probs, d=3):
     '''
     
     # choose model's weights
-    weights_path = 'models/weights_LeNet5ish_1000_only_podcasts_and_ads_6epochs.hdf5'
+    weights_filename = 'weights_LeNet5ish_1000_only_podcasts_and_ads_6epochs.hdf5'
+    weights_path = os.path.join(weights_folder, weights_filename)
     # recreate a model for evaluation
     speech_model = create_CNN_model(quiet = True)
     # load weights

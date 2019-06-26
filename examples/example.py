@@ -1,16 +1,12 @@
-import sys
-sys.path.insert(0, '../adetector')
-
-import core
-import utils
+import adetector as adt
 
 '''load audio file and convert it to an array with shape 
    (n_timeframes, n_mfcc, n_timebins, 1)
    where n_timeframes = audio_length/d 
 '''
 radio_stream_path =  '../Data/sample_audio.wav'
-X = core.audio2features(radio_stream_path)
-timestamps, probs = core.find_ads(X, T=0.96, n=1, show=True)
+X = adt.core.audio2features(radio_stream_path)
+timestamps, probs = adt.core.find_ads(X, T=0.96, n=1, show=True)
 
 print("Ads were detected at the following timestamps:")
 print(timestamps)
