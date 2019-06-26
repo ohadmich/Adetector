@@ -6,4 +6,5 @@ WEIGHTS_FOLDER = '/home/ohadmich/Documents/Github/Ad_Detector/adetector/models'
 SAMPLING_RATE = 22050 # the sampling rate of the audio file
 CLIP_DURATION = 3 # length in seconds of the input clip to the classification model
 N_MFCC = 13 # number of mfc coefficients used when extracting features
-N_TIMEBINS = 130 # number of timebins in the  
+N_TIMEBINS = 130 # number of timebins in the  mfcc feature matrix of a 3s long clip.
+                 # the shape of the mfcc feature matrix is (N_MFCC,N_TIMEBINS)  
