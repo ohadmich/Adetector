@@ -13,6 +13,7 @@ from keras.callbacks import ModelCheckpoint
 
 from . import utils
 from .config import WEIGHTS_FOLDER, SAMPLING_RATE, CLIP_DURATION, N_MFCC, N_TIMEBINS
+from .models import create_CNN_model
 
 def find_ads(X, T=0.85, n=10, show = False):
     '''Returns timestamps and probabilities for all ads found in feature array X
@@ -33,23 +34,6 @@ def find_ads(X, T=0.85, n=10, show = False):
     probs = Ad_vs_speech_classifier(X, timestamps, probs)
 
     return timestamps, probs
-
-def create_CNN_model(quiet = False):
-    '''Creates a model obejct with a 2D input of shape (n_mfcc, n_timebins,1)'''
-    model = Sequential() # create a model instance
-
-    #add model layers
-    model.add(Conv2D(16, (3,3), strides=(1,1), activation = 'relu', padding='same', 
-                     input_shape=(N_MFCC, N_TIMEBINS, 1)))
-    model.add(Conv2D(16, (3,3), strides=(1,1), activation = 'relu', padding='same'))
-    model.add(Flatten())
-    model.add(Dense(32, activation = 'relu'))
-    model.add(Dense(1, activation = 'sigmoid'))
-    
-    if not quiet:
-        model.summary()
-    
-    return model
 
 def audio2features(file_path, offset = 0.0, max_duration = 20, CNN=True):
     ''' Prepares an array of features to which are used as an input to a model
