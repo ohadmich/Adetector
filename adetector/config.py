@@ -1,6 +1,6 @@
 ''' This is a configuration file '''
 # a path to a folder with trained weights - Please update before installation
-WEIGHTS_FOLDER = '/home/ohadmich/Documents/Github/Ad_Detector/adetector/models'
+WEIGHTS_FOLDER = '/home/ohadmich/Documents/Github/Ad_Detector/adetector/model_weights'
 
 # model hyperparameters
 SAMPLING_RATE = 22050 # the sampling rate of the audio file
