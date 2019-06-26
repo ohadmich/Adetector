@@ -1,4 +1,4 @@
-# Audio Ad Detection in Radio Streams
+# Adetector - Finding Ads in Radio Streams
 This is a consulting project for Veritonic Inc. done as part of Insight Artificial Inetligence Fellowship.
 
 ## Installation
