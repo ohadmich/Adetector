@@ -12,9 +12,9 @@ from keras.layers import Dense, Conv2D, Flatten
 from keras.callbacks import ModelCheckpoint
 
 from . import utils
-from .config import weights_folder
+from .config import WEIGHTS_FOLDER, SAMPLING_RATE, CLIP_DURATION, N_MFCC, N_TIMEBINS
 
-def find_ads(X, T=0.85, n=10, show = False, d=3):
+def find_ads(X, T=0.85, n=10, show = False):
     '''Returns timestamps and probabilities for all ads found in feature array X
        inputs:
        ------ 
@@ -22,28 +22,25 @@ def find_ads(X, T=0.85, n=10, show = False, d=3):
        T - a probability threshold for detection 
        n - moving average window size, used for smoothing prob. vector before detection
        show - when set to be true, shows a plot of ad probability over time
-       d - ***must match the value of clip_duration used in audio2features
-              DO NOT MODIFY IF MODEL WAS NOT RETRAINED WITH THE NEW VALUES***
        outputs:
        -------
        timestamps - a 2D array of with the detected timestamps - shape: (n_detections, 2)
        probs - a vector of ad probabilities for each detection - shape: (n_detection,)
 
     '''
-    
     prob_over_time = Ad_vs_music_classifier(X)
-    timestamps, probs = get_timestamps(prob_over_time, T, n, show, d)
+    timestamps, probs = get_timestamps(prob_over_time, T, n, show)
     probs = Ad_vs_speech_classifier(X, timestamps, probs)
 
     return timestamps, probs
 
-def create_CNN_model(n_mfcc = 13, n_timebins = 130, quiet = False):
+def create_CNN_model(quiet = False):
     '''Creates a model obejct with a 2D input of shape (n_mfcc, n_timebins,1)'''
     model = Sequential() # create a model instance
 
     #add model layers
     model.add(Conv2D(16, (3,3), strides=(1,1), activation = 'relu', padding='same', 
-                     input_shape=(n_mfcc, n_timebins, 1)))
+                     input_shape=(N_MFCC, N_TIMEBINS, 1)))
     model.add(Conv2D(16, (3,3), strides=(1,1), activation = 'relu', padding='same'))
     model.add(Flatten())
     model.add(Dense(32, activation = 'relu'))
@@ -54,8 +51,7 @@ def create_CNN_model(n_mfcc = 13, n_timebins = 130, quiet = False):
     
     return model
 
-def audio2features(file_path, offset = 0.0, max_duration = 20, CNN=True,
-                   clip_duration = 3, sr = 22050, n_mfcc = 13):
+def audio2features(file_path, offset = 0.0, max_duration = 20, CNN=True):
     ''' Prepares an array of features to which are used as an input to a model
         for prediction. The entire file is devided into short clips, features are
         extracted from each clip using mfccs and then normalized  
@@ -65,31 +61,24 @@ def audio2features(file_path, offset = 0.0, max_duration = 20, CNN=True,
         offset - load audio with offset from start time, shoud be in minutes!
         max_duration - maximal duration to load into memory, should be in minutes!
         CNN - true for inputing features to a CNN model
-        ***Warnning***
-        DO NOT MODIFY THE INPUTS BELOW IF MODEL WAS NOT RETRAINED WITH THE NEW VALUES
-        Current models support only the default values!!
-        **************
-        clip_duration - time in seconds of the timeframe which is used for extracting
-                        features. 
-        sr - sampling rate of the audio file 
-        n_mfcc - number of mfc coefficients used in when extracting features
-
         outputs:
         -------
         X - an array of normalized features, in shape:
             *(n_clips, n_features,) for NN (when CNN is False)
             *(n_clips, n_mfcc, n_timebins, 1) for CNN (when CNN is True)
     '''
+    sr = SAMPLING_RATE
+    d = CLIP_DURATION
     features_vec = []
     # load audio
     audio = librosa.core.load(file_path, sr = sr, offset = offset*60,
                               duration = max_duration*60)[0]
     audio_length = len(audio)/sr # in sec
-    n_clips = int(np.floor(audio_length/clip_duration)) # full clips in audio
+    n_clips = int(np.floor(audio_length/d)) # full clips in audio
     # cut audio to clips and extract features
     for i in range(n_clips):
-        clip = audio[i*clip_duration*sr:(i+1)*clip_duration*sr]
-        features = librosa.feature.mfcc(clip, sr=sr, n_mfcc=n_mfcc, dct_type=2)
+        clip = audio[i*d*sr:(i+1)*d*sr]
+        features = librosa.feature.mfcc(clip, sr=sr, n_mfcc=N_MFCC, dct_type=2)
         if CNN:
             features_vec.append(features)
         else:
@@ -118,7 +107,7 @@ def Ad_vs_music_classifier(X):
     '''
     # choose model's weights
     weights_filename = 'weights_LeNet5ish_1000_only_music_and_ads_10epochs.hdf5'
-    weights_path = os.path.join(weights_folder, weights_filename)
+    weights_path = os.path.join(WEIGHTS_FOLDER, weights_filename)
     # create a model for evaluation
     model = create_CNN_model(quiet=True)
     # load weights
@@ -130,7 +119,7 @@ def Ad_vs_music_classifier(X):
 
     return prob_over_time
 
-def get_timestamps(prob_over_time, T=0.85, n=10, show = False, d=3):
+def get_timestamps(prob_over_time, T=0.85, n=10, show = False):
     '''Takes a probility over time and extracts timestamps of detected ads
        inputs:
        ------
@@ -138,9 +127,6 @@ def get_timestamps(prob_over_time, T=0.85, n=10, show = False, d=3):
        T - a probability threshold for detection 
        n - moving average window size, used for smoothing prob. vector before detection
        show - when set to be true, shows a plot of ad probability over time
-       d - ***must match the value of clip_duration used in audio2features
-              DO NOT MODIFY IF MODEL WAS NOT RETRAINED WITH THE NEW VALUES***
-
        outputs:
        -------
        timestamps - a 2D array of with the detected timestamps - shape: (n_detections, 2)
@@ -148,6 +134,7 @@ def get_timestamps(prob_over_time, T=0.85, n=10, show = False, d=3):
                based on music vs. ad classifier (gives high probability for speech),
                shape: (n_detection,) 
     '''
+    d = CLIP_DURATION
     # smoothing and creating a time axis
     prob_over_time_smooth = utils.moving_average(prob_over_time.flatten(), n) # smoothing 
     t = np.arange(1,len(prob_over_time)+1)*d/60.0 # create time axis
@@ -232,7 +219,7 @@ def extract_timeframe_indices(t, start_time, end_time):
 
     return S_idx, E_idx
 
-def Ad_vs_speech_classifier(X, timestamps, probs, d=3):
+def Ad_vs_speech_classifier(X, timestamps, probs):
     '''Returns ad probability vector after applying ad vs speech classification
        inputs:
        ------
@@ -241,18 +228,16 @@ def Ad_vs_speech_classifier(X, timestamps, probs, d=3):
        probs - a vector of ad probabilities for each detection, calculated only
                based on music vs. ad classifier (gives high probability for speech),
                shape: (n_detection,)
-       d - ***must match the value of clip_duration used in audio2features
-              DO NOT MODIFY IF MODEL WAS NOT RETRAINED WITH THE NEW VALUES***
        outputs:
        -------
        probs - probability of vector of shape (len(timestamps),) containing
                the probability of each timestamp being an ad based on a model
                trained to differentiate between ads and podcasts
     '''
-    
+    d = CLIP_DURATION
     # choose model's weights
     weights_filename = 'weights_LeNet5ish_1000_only_podcasts_and_ads_6epochs.hdf5'
-    weights_path = os.path.join(weights_folder, weights_filename)
+    weights_path = os.path.join(WEIGHTS_FOLDER, weights_filename)
     # recreate a model for evaluation
     speech_model = create_CNN_model(quiet = True)
     # load weights
