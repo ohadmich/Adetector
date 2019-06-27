@@ -4,6 +4,7 @@ import numpy as np
 
 import train
 from config import TEST_DATA_FOLDER, N_MFCC, N_TIMEBINS
+from DataGenerator import DataGenerator_Sup
 
 class TestUtils(unittest.TestCase):
 
@@ -17,6 +18,10 @@ class TestUtils(unittest.TestCase):
                                                 'music_file_paths.npy'))
         self.podcast_files = np.load(os.path.join(TEST_DATA_FOLDER,
                                                   'podcast_file_paths.npy'))
+        self.train_files = np.load(os.path.join(TEST_DATA_FOLDER,
+                                                'train_file_paths.npy'))
+        self.test_files = np.load(os.path.join(TEST_DATA_FOLDER,
+                                                'test_file_paths.npy'))
 
     def test_list_data_output(self):
         a,m,p = train.list_data()
@@ -69,6 +74,22 @@ class TestUtils(unittest.TestCase):
         ones_array = np.ones((N_MFCC, N_TIMEBINS, 1))
         self.assertTrue(np.allclose(mu, zeros_array))
         self.assertTrue(np.allclose(std, ones_array))
+    
+    def test_train_CNN_model_checkpoint(self):
+        if os.path.exists('model1.hdf5'):
+            os.remove('model1.hdf5')
+        train_generator = DataGenerator_Sup(self.train_files, dataset='train', CNN=True)
+        _ = train.train_CNN_model(train_generator, epochs=1)
+        self.assertTrue(os.path.exists('model1.hdf5'))
+    
+    def test_train_CNN_model_history_output(self):
+        epochs = 3
+        train_generator = DataGenerator_Sup(self.train_files, dataset='train', CNN=True)
+        history = train.train_CNN_model(train_generator, epochs=epochs)
+        self.assertAlmostEqual(len(history['loss']), epochs)
+        self.assertTrue(history['loss'][0]>history['loss'][-1])
+        os.remove('model1.hdf5')
+
 
 if __name__ == '__main__':
     unittest.main()
