@@ -49,5 +49,12 @@ class TestUtils(unittest.TestCase):
                                                   self.podcast_files, 
                                                   neg_type=True))
 
+    def test_create_data_generators_balanced_bach(self):
+        trng, _ = train.create_data_generators(self.pos_files, self.music_files)
+        _, Y = trng.__getitem__(1)
+        mean_value = np.mean(Y)
+        self.assertTrue(mean_value>0.25)
+        self.assertTrue(mean_value<0.75)
+
 if __name__ == '__main__':
     unittest.main()
