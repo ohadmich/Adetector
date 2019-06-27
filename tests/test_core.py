@@ -1,17 +1,19 @@
+import os
 import unittest
 import numpy as np
 
 import adetector as adt
+from adetector.config import TEST_DATA_FOLDER
 
 class TestCore(unittest.TestCase):
     
     def setUp(self):
-        self.audio_path = '../Data/sample_audio.wav'
+        self.audio_path = os.path.join(TEST_DATA_FOLDER, 'sample_audio.wav')
         self.audio_length = 26 # sample_audio.wav's length in seconds
         self.d = 3 # default clip_duration in seconds
         self.n_mfcc = 13 # default number of mfc coeficients
         self.n_timebins = 130 # default timebins in each clip
-        self.X_sample = np.load('../Data/X_sample.npy') # a sample X array for testing
+        self.X_sample = np.load(os.path.join(TEST_DATA_FOLDER,'X_sample.npy')) # a sample X array for testing
         self.prob_over_time_sample = np.array([0.5,0.2,0.8,0.92,0.96,0.99,0.78,0.6,0.2])
         self.timestamps_sample = np.array([[0., 0.15],[0.3, 0.4]]) # timestamps for sample audio
         self.probs_sample = np.array([[0.21392338],[0.9058739]]) # ad probabilities of sample audio

@@ -1,8 +1,9 @@
+import os
 import unittest
 import numpy as np
 
 import train
-import config
+from config import TEST_DATA_FOLDER, N_MFCC, N_TIMEBINS
 
 class TestUtils(unittest.TestCase):
 
@@ -10,9 +11,12 @@ class TestUtils(unittest.TestCase):
         self.n_ads = 2293 # number of ad files
         self.n_music = 1013 # number of music files
         self.n_podcasts = 300 # number of podcast files
-        self.pos_files = np.load('../Data/pos_file_paths.npy')
-        self.music_files = np.load('../Data/music_file_paths.npy')
-        self.podcast_files = np.load('../Data/podcast_file_paths.npy')
+        self.pos_files = np.load(os.path.join(TEST_DATA_FOLDER,
+                                              'pos_file_paths.npy'))
+        self.music_files = np.load(os.path.join(TEST_DATA_FOLDER,
+                                                'music_file_paths.npy'))
+        self.podcast_files = np.load(os.path.join(TEST_DATA_FOLDER,
+                                                  'podcast_file_paths.npy'))
 
     def test_list_data_output(self):
         a,m,p = train.list_data()
@@ -28,11 +32,11 @@ class TestUtils(unittest.TestCase):
     def test_create_data_generators_output_shape(self):
         trng, tstg = train.create_data_generators(self.pos_files, self.music_files)
         X, Y = trng.__getitem__(0)
-        self.assertTupleEqual(X.shape[1:], (config.N_MFCC, config.N_TIMEBINS, 1))
+        self.assertTupleEqual(X.shape[1:], (N_MFCC, N_TIMEBINS, 1))
         self.assertAlmostEqual(Y.shape[1], 1)
         self.assertAlmostEqual(X.shape[0], Y.shape[0])
         X1, Y1 = tstg.__getitem__(0)
-        self.assertTupleEqual(X1.shape[1:], (config.N_MFCC, config.N_TIMEBINS, 1))
+        self.assertTupleEqual(X1.shape[1:], (N_MFCC, N_TIMEBINS, 1))
         self.assertAlmostEqual(Y1.shape[1], 1)
         self.assertAlmostEqual(Y1.shape[0], X1.shape[0])
 
@@ -55,6 +59,16 @@ class TestUtils(unittest.TestCase):
         mean_value = np.mean(Y)
         self.assertTrue(mean_value>0.25)
         self.assertTrue(mean_value<0.75)
+
+    def test_create_data_generators_batch_normalization(self):
+        trng, _ = train.create_data_generators(self.pos_files, self.music_files)
+        X, _ = trng.__getitem__(2)
+        mu = np.mean(X, axis=0)
+        std = np.std(X, axis=0)
+        zeros_array = np.zeros((N_MFCC, N_TIMEBINS, 1))
+        ones_array = np.ones((N_MFCC, N_TIMEBINS, 1))
+        self.assertTrue(np.allclose(mu, zeros_array))
+        self.assertTrue(np.allclose(std, ones_array))
 
 if __name__ == '__main__':
     unittest.main()
