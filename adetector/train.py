@@ -50,3 +50,89 @@ def list_data():
           + str(neg_minutes) + ' minutes of negative')
     
     return pos_files, music_files, podcast_files
+
+def create_data_generators(pos_files, neg_files, data_minutes = 1000,
+                           train_fraction = 0.9, neg_type = False):
+    '''
+    creates a balanced data generators for training and testing models
+    inputs:
+    ------
+    pos_files - a list of paths to all the positive files
+    neg_files - a list of paths to all the negative files
+    data_minutes - the total amount of data to be used in minutes
+    train_fraction - the fraction of the data that would be used for training
+    neg_type - defines which negatives are used. 0 = music, 1 = podcasts
+    outputs:
+    -------
+    train_generator - a keras train generator class for generating training data
+    test_generator -  a keras train generator class for generating test data
+    '''
+    pos_minutes2use = int(data_minutes/2.0)
+    neg_minutes2use = int(data_minutes/2.0)
+
+    # calculate train and test minutes splitting
+    # train
+    pos_train_minutes = round(train_fraction*pos_minutes2use, 2) # number of pos audio training minutes
+    neg_train_minutes = round(train_fraction*neg_minutes2use, 2) # number of minutes for music training
+    # test
+    pos_test_minutes = pos_minutes2use - pos_train_minutes
+    neg_test_minutes = neg_minutes2use - neg_train_minutes
+
+    print('Using ' + str(pos_train_minutes) + ' minutes of positives for training and '
+        + str(pos_test_minutes) + ' for testing')
+    print('Using ' + str(neg_train_minutes) + ' minutes of negatives for training and ' 
+        + str(neg_test_minutes) +' for testing')
+
+    # calculate number of files
+    # train
+    n_pos_train_files = int(pos_train_minutes/config.AD_FILE_DURATION)
+    n_pos_test_files = int(pos_test_minutes/config.AD_FILE_DURATION)
+    if neg_type:
+        n_neg_train_files = int(neg_train_minutes/config.PODCAST_FILE_DURATION)
+        n_neg_test_files = int(neg_test_minutes/config.PODCAST_FILE_DURATION)
+    else:
+        n_neg_train_files = int(neg_train_minutes/config.MUSIC_FILE_DURATION)
+        n_neg_test_files = int(neg_test_minutes/config.MUSIC_FILE_DURATION)
+    
+    print('---------------------------------------------------------------')
+    print('This translates into:')
+    print(str(n_pos_train_files) + ' poitive files for training ' + 'and '+
+          str(n_pos_test_files) + ' for testing')
+    if neg_type:
+        print(str(n_neg_train_files) + ' podcasts files for training ' + 'and '+
+          str(n_neg_test_files) + ' for testing')
+    else:
+        print(str(n_neg_train_files) + ' music files for training ' + 'and '+
+            str(n_neg_test_files) + ' for testing')
+
+    assert len(neg_files) >= n_neg_train_files + \
+    n_neg_test_files, 'There are not enough negative files for that!'
+
+    '''Shuffling data and creating train and test list and'''
+    train_files = [] # a list of training files 
+    test_files = [] # a list of test files 
+
+    # shuffle files
+    np.random.seed(1)
+    np.random.shuffle(pos_files)
+    np.random.seed(2)
+    np.random.shuffle(neg_files)
+
+    '''Collect a balanced list of files + add labels'''
+    # Training list
+    for f in pos_files[:n_pos_train_files]:
+        train_files.append([f,1])
+    for f in neg_files[:n_neg_train_files]:
+        train_files.append([f,0])
+
+    # Test list
+    for f in pos_files[n_pos_train_files:n_pos_train_files + n_pos_test_files]:
+        test_files.append([f,1])
+    for f in neg_files[n_neg_train_files:n_neg_train_files + n_neg_test_files]:
+        test_files.append([f,0])
+
+    train_generator = DataGenerator_Sup(train_files, dataset='train', CNN=True)
+    test_generator = DataGenerator_Sup(test_files, dataset='test', CNN=True)
+    
+    return train_generator, test_generator
+
