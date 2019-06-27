@@ -133,6 +133,28 @@ def create_data_generators(pos_files, neg_files, data_minutes = 1000,
 
     train_generator = DataGenerator_Sup(train_files, dataset='train', CNN=True)
     test_generator = DataGenerator_Sup(test_files, dataset='test', CNN=True)
-    
+
     return train_generator, test_generator
 
+def train_CNN_model(train_generator, epochs = 10, path_to_ckpt_file = 'model1.hdf5'):
+    '''
+    trains a CNN model, saves a chekpoint of the weights after each epoch and
+    returns a history dictionary with values of loss and accuracy for every epoch
+    inputs:
+    ------
+    train_generator - a keras data generator object, an output of 
+                      the create_data_generators function
+    epoch - number of epochs to train on
+    path_to_ckpt_file - a path to a file which would hold the trained weights
+    
+    outputs:
+    -------
+    history - a history dictionary, history['loss'] and history['acc'] holds 
+              the loss and accuracy at the end of each epoch
+    '''
+    model = create_CNN_model()
+    checkpoint = ModelCheckpoint(path_to_ckpt_file)
+    model.compile(loss='binary_crossentropy', optimizer='adam', metrics=['accuracy'])
+    H = model.fit_generator(generator = train_generator,
+                            epochs = epochs, callbacks = [checkpoint])
+    return H.history
