@@ -2,9 +2,9 @@
 
 """Package paths - Please update before installation!"""
 # a path to a folder in which trained weights are saved
-WEIGHTS_FOLDER = '/home/ohadmich/Documents/Github/Ad_Detector/adetector/model_weights'
+WEIGHTS_FOLDER = '/home/ohadmich/Documents/Github/Adetector/adetector/model_weights'
 # a path to a folder in which data for unitests is stored
-TEST_DATA_FOLDER = '/home/ohadmich/Documents/Github/Ad_Detector/Data'
+TEST_DATA_FOLDER = '/home/ohadmich/Documents/Github/Adetector/data'
 # a path to a folder which conatains positive examples
 AD_FOLDER = '/home/ohadmich/Documents/Github/Data/audio_ads'
 # a path to a folder which conatains negative music examples
