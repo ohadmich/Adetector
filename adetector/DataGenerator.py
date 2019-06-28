@@ -151,7 +151,7 @@ class DataGenerator_Sup(keras.utils.Sequence):
             else:        
                 X.append(features.flatten())
             
-        return np.array(X), np.vstack(Y)
+        return np.array(X), np.vstack(Y).astype(int)
     
     def load_clips(self, filepath_list, labels):
         '''Loads files in filepath_list, cuts them to clips of length
