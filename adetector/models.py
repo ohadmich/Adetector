@@ -3,7 +3,7 @@ from keras.models import Sequential
 from keras.layers import Dense, Conv2D, Flatten
 from keras.callbacks import ModelCheckpoint
 
-from.config import N_MFCC, N_TIMEBINS, N_FEATURES
+from .config import N_MFCC, N_TIMEBINS, N_FEATURES
 
 def create_CNN_model(quiet = False):
     '''Creates a model obejct with a 2D input of shape (n_mfcc, n_timebins,1)'''

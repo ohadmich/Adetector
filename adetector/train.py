@@ -5,10 +5,10 @@ import librosa
 import keras
 from keras.callbacks import ModelCheckpoint
 
-from models import create_CNN_model
-from utils import plot_confusion_matrix
-from DataGenerator import DataGenerator_Sup
-import config
+from .models import create_CNN_model
+from .utils import plot_confusion_matrix
+from .DataGenerator import DataGenerator_Sup
+from . import config
 
 def list_data():
     '''

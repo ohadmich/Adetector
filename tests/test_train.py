@@ -2,9 +2,9 @@ import os
 import unittest
 import numpy as np
 
-import train
-from config import TEST_DATA_FOLDER, N_MFCC, N_TIMEBINS
-from DataGenerator import DataGenerator_Sup
+import adetector.train as train
+from adetector.config import TEST_DATA_FOLDER, N_MFCC, N_TIMEBINS
+from adetector.DataGenerator import DataGenerator_Sup
 
 class TestUtils(unittest.TestCase):
 
