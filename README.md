@@ -1,6 +1,11 @@
 # Adetector - Finding Ads in Radio Streams
 This is a consulting project for Veritonic Inc. done as part of Insight Artificial Inetligence Fellowship.
 
+## Background
+The digital audio advertising market has grown by more than 68% in the last two years reaching $2.3 billion, but there is still no objective way to quantify the quality of an audio ad. Veritonic is the first analytic platform that does just that by crowdsourcing customer reviews of ads and analyzing them. As this is both expensive and inefficient, automating the process using ML models that score ads is desirable, but that demands a lot of data!
+
+Adetector uses two cascaded CNN models to detects audio ads in radio streaming in order to automate Veritonic's audio ad data collection. The algorithm separates speech from music with 96% accuracy, ads from speech with 86% and does that in only a fraction of the time it takes a human to do that.
+
 ## Installation
 The code is written as a Python 3.6 package. For installing it on your computer, clone the repository, then edit the `WEIGHTS_FOLDER` variable in `confing.py` file to point to a location of your choice and place the saved model weights in it.
 Finally use the terminal to install the package:
@@ -8,6 +13,8 @@ Finally use the terminal to install the package:
 cd path/to/cloned/repository
 pip install .
 ```
+
+## Excecution
 The package should now be avialable for use. You can import the package and use it to generate a prediction for some radio stream audio file as shown below:
 ```python
 import adetector as adt
@@ -56,3 +63,8 @@ The `audio2features` function converts the audio file to an array of features wh
     ├── test_train.py
     └── test_utils.py
 ```
+## Model
+
+## Data
+
+## Performance
