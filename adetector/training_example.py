@@ -19,4 +19,7 @@ plt.plot(history['acc'], linewidth=3, color = 'g')
 plt.xlabel('epoch')
 plt.ylabel('accuracy')
 plt.tight_layout()
+
+loss, acc = train.evaluate_model('model1.hdf5', test_generator)
+print('The accuracy on the test set is: ' + str(acc))
 plt.show()

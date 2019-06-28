@@ -158,3 +158,33 @@ def train_CNN_model(train_generator, epochs = 10, path_to_ckpt_file = 'model1.hd
     H = model.fit_generator(generator = train_generator,
                             epochs = epochs, callbacks = [checkpoint])
     return H.history
+
+def evaluate_model(model_weights_path, test_generator, T = 0.8):
+    '''
+    evaluates model performance on the test set
+    inputs:
+    ------
+    model_weights_path - a path to saved model weights to evaluate
+    trest_generator - a keras data generator object, an output of 
+                      the create_data_generators function
+    T - a threshold for confution matrix computation, any value larger than
+        T would be regarded as positive detection (Y_pred > T)
+    
+    outputs:
+    -------
+
+    '''
+    # create a model and load weights
+    model = create_CNN_model()
+    model.load_weights(model_weights_path)
+    model.compile(loss='binary_crossentropy', optimizer='adam', metrics=['accuracy'])
+
+    # evaluate loss and accuracy values on a test batch
+    X,Y = test_generator.__getitem__(0)
+    loss, acc = model.evaluate(X, Y)
+
+    # compute confusion matrix
+    Y_pred = model.predict(X)
+    plot_confusion_matrix(Y, Y_pred>T, ['Non Ad', 'Ad'])
+
+    return loss, acc
