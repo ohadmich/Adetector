@@ -90,6 +90,13 @@ class TestUtils(unittest.TestCase):
         self.assertTrue(history['loss'][0]>history['loss'][-1])
         os.remove('model1.hdf5')
 
+    def test_evaluate_model_output(self):
+        test_generator = DataGenerator_Sup(self.test_files, dataset='test', CNN=True)
+        loss, acc = train.evaluate_model(os.path.join(TEST_DATA_FOLDER, 'model1.hdf5'),
+                                         test_generator)
+        self.assertTrue(loss<1)
+        self.assertTrue(acc>0.5 and acc<1)
+
 
 if __name__ == '__main__':
     unittest.main()
