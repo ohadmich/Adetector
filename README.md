@@ -26,6 +26,11 @@ timestamps, probs = adt.core.find_ads(X, T=0.85, n=10, show=True)
 The `audio2features` function converts the audio file to an array of features which is then input to `find_ads` which returns an array of timestamps and a vector of ad probabilities corresponding to each timestamp. The argument `T` defines the threshold for detection, `n` defines a window size for the moving average which is done before the threshold is taken and when show is set to be `True` a graph of probability over time is showed with the threshold overlaid. 
 
 ## Repo directory structure
+The package is located in the `adetector` folder. All the modules are located in it along side a configuration file `config.py` where all the paths to the required files are defined. A `models_weights` folder holds the models' parameters which are used for prediction - make sure that the `WEIGHTS_FOLDER` path in `config.py` is updated and points to the location of the models_weights folder!
+
+The `data` folder contains some sample audio examples and other data that is mainly used for unitesting. In the `examples` folder you can find two scripts that show how the package can be used for predition and one that shows a training example. NOTE: for the training example to work, the paths of the data folders (`AD_FOLDER`, `MUSIC_FOLDER`) must point to a corresponding folder with enough data in it.
+
+Unit tests are located in the `tests` folder and for them to run properly, the variable `TEST_DATA_FOLDER` in config.py should point to the `data` folder.  
 ```
 .
 ├── adetector
@@ -75,6 +80,6 @@ For training the CNN models I have used positive examples from Veritonic's audio
 
 ## Performance
 The music/speech CNN classifiers were tested on a balanced test set of positive (ads) and negative (music/podcasts) examples.
-The music classifier acheived an accuracy of 96% with less than 1% false positives and 4% false negatives. The speech classifier has 86% accuracy with less than 8% false positives/negatives. Confusion matrices were computed by predicting as positives samples with predicted probability > 80%. The full results are shown below:
+The music classifier achieved an accuracy of 96% with less than 1% false positives and 4% false negatives. The speech classifier has 86% accuracy with less than 8% false positives/negatives. Confusion matrices were computed by predicting as positives samples with predicted probability > 80%. The full results are shown below:
 
 <img src="./img/Algorithm_performance.png" width="900" >
