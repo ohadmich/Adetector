@@ -65,6 +65,16 @@ The `audio2features` function converts the audio file to an array of features wh
 ```
 ## Model
 
+<img src="./img/Algorithm_pipeline.png" width="900" >
+
 ## Data
+For training the CNN models I have used positive examples from Veritonic's audio ads collection (which is proprietary and therefore not shared here), and negative examples of music genres and podcast episodes from the following open source resources:
+* [GITZAN dataset](http://opihi.cs.uvic.ca/sound/genres.tar.gz) - The dataset consists of 1000 audio tracks each 30 seconds long. It contains 10 genres namely, blues, classical, country, disco, hiphop, jazz, reggae, rock, metal and pop. Each genre consists of 100 sound clips.
+* [Podcast dataset](https://github.com/ylongqi/podcast-data-modeling) - A collection of 88k podcast episodes divided into ~12 seconds long sound clips.
+
 
 ## Performance
+The music/speech CNN classifiers were tested on a balanced test set of positive (ads) and negative (music/podcasts) examples.
+The music classifier acheived an accuracy of 96% with less than 1% false positives and 4% false negatives. The speech classifier has 86% accuracy with less than 8% false positives/negatives. Confusion matrices were computed by predicting as positives samples with predicted probability > 80%. The full results are shown below:
+
+<img src="./img/Algorithm_performance.png" width="900" >
