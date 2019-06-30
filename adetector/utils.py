@@ -5,11 +5,13 @@ import librosa
 import librosa.display
 from sklearn.metrics import confusion_matrix
 
-def moving_average(a, n=10) :
-    a_padded = np.pad(a, (n//2, n-1 - n//2), mode = 'edge')
+
+def moving_average(a, n=10):
+    a_padded = np.pad(a, (n//2, n-1 - n//2), mode='edge')
     ret = np.cumsum(a_padded, dtype=float)
     ret[n:] = ret[n:] - ret[:-n]
     return ret[n - 1:] / n
+
 
 def plot_confusion_matrix(y_true, y_pred, classes,
                           normalize=False,
