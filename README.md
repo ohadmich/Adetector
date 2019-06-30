@@ -68,7 +68,8 @@ Unit tests are located in the `tests` folder and for them to run properly, the v
     ├── test_train.py
     └── test_utils.py
 ```
-## Model
+## Algorithm
+The algorithm is made of two CNN classifiers that share the same architecture. The first one is trained on ads and music examples and therefore specialized in filtering music out.  The second is trained on ads and podcasts to separate ads from speech. The algorithm pipeline (shown below) takes an audio file, cuts it into 3 seconds clips from which 13 Mel-frequency cepstral coefficients (MFCCs) are extracted and sent to the music classification CNN. The music CNN outputs an ad probability for each clip, forming a graph of ad probability over time. A moving average is applied in order to mitigate transient false positive detections, and then only probabilities that are larger than a certain threshold are considered detections. Next, the detected time frames are sent to the speech classification CNN where a probability value is assigned for each time bin and averaged over time to obtain a single ad probability value per time frame. The final output is an array of timestamps and a probability vector.     
 
 <img src="./img/Algorithm_pipeline.png" width="900" >
 
