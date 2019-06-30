@@ -9,4 +9,10 @@ setup(name='adetector',
       author_email='ohadmich@gmail.com',
       license='MIT',
       packages=['adetector'],
+      install_requires = [
+      'numpy',
+      'matplotlib',
+      'librosa',
+      'TensorFlow',
+      'keras'],
       zip_safe=False)
