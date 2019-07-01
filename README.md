@@ -7,8 +7,24 @@ The digital audio advertising market has grown by more than 68% in the last two 
 Adetector uses two cascaded CNN models to detects audio ads in radio streaming in order to automate Veritonic's audio ad data collection. The algorithm separates speech from music with 96% accuracy, ads from speech with 86% and does that in only a fraction of the time it takes a human to do that.
 
 ## Installation
-The code is written as a Python 3.6 package. For installing it on your computer, clone the repository, then edit the `WEIGHTS_FOLDER` variable in `confing.py` file to point to a location of your choice and place the saved model weights in it.
-Finally use the terminal to install the package:
+The code is written as a Python 3.6 package. The package can be installed in two ways: (1) by pulling a docker image and runing inference in the container or (2) by cloning the repository and installing the package localy. The two options are described in detail below:
+
+### Pulling a docker image
+Use docker to pull the adetector image by using the following command in your terminal:
+``` bash
+docker pull ohadmich/adetector:0.1.0
+```
+This command would download the adetector docker image, once its done - create a container and ssh into it:
+```bash
+docker run --rm -ti ohadmich/adetector:0.1.0 bash
+```
+Now when runing python, the package can be imported and used for inference as described below in the [Excecution](#excecution) section.
+To see an example, navigate to `/usr/src/Adetector/examples` and run `example.py` or `example2.py`. If you would like to train new models, add training data to the container in the following path: `/home/Data/`, where positive ad examples should be kept in a subfolder named `audio_ads`, music examples under `Music` and podcasts under `podcasts`
+
+### Installing localy:
+For installing localy on your computer, clone the repository, then edit the `WEIGHTS_FOLDER` variable in `confing.py` file so it would reference the location of the saved model weights on your computer (the two files in adetector/model_weights). If you would like to run tests, change the `TEST_DATA_FOLDER` variable so it would reference the `data` folder. For using the train module to train models, change the `AD_FOLDER`, `MUSIC_FOLDER` and `PODCAST_FOLDER` to reference the corresponding folders that hold the training data.
+
+Finally, use the terminal to install the package:
 ```bash
 cd path/to/cloned/repository
 pip install .
