@@ -3,15 +3,15 @@
 """Package paths - Please update before installation!"""
 # a path to a folder in which trained weights are saved
 WEIGHTS_FOLDER = \
-     '/home/ohadmich/Documents/Github/Adetector/adetector/model_weights'
+     '/usr/src/Adetector/adetector/model_weights'
 # a path to a folder in which data for unitests is stored
-TEST_DATA_FOLDER = '/home/ohadmich/Documents/Github/Adetector/data'
+TEST_DATA_FOLDER = '/usr/src/Adetector/data'
 # a path to a folder which conatains positive examples
-AD_FOLDER = '/home/ohadmich/Documents/Github/Data/audio_ads'
+AD_FOLDER = '/home/Data/audio_ads'
 # a path to a folder which conatains negative music examples
-MUSIC_FOLDER = '/home/ohadmich/Documents/Github/Data/Music'
+MUSIC_FOLDER = '/home/Data/Music'
 # a path to a folder which conatains negative music examples
-PODCAST_FOLDER = '/home/ohadmich/Documents/Github/Data/podcasts'
+PODCAST_FOLDER = '/home/Data/podcasts'
 
 """Model hyperparameters"""
 SAMPLING_RATE = 22050  # the sampling rate of the audio file
