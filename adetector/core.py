@@ -29,7 +29,7 @@ def find_ads(X, T=0.85, n=10, show=False):
        outputs:
        -------
        timestamps - a 2D array containing the detected timestamps
-                    shape: (n_detections, 2)
+                    units: minutes, shape: (n_detections, 2)
        probs - a vector of ad probabilities for each detection
                shape: (n_detection,)
 
@@ -125,7 +125,7 @@ def get_timestamps(prob_over_time, T=0.85, n=10, show=False):
        outputs:
        -------
        timestamps - a 2D array of with the detected timestamps
-                    shape: (n_detections, 2)
+                    units: minutes, shape: (n_detections, 2)
        probs - a vector of ad probabilities for each detection, calculated only
                based on music vs. ad classifier
                (gives high probability for speech), shape: (n_detection,)
@@ -226,7 +226,7 @@ def Ad_vs_speech_classifier(X, timestamps, probs):
        ------
        X - an array of features in shape: (n_clips, n_mfcc, n_timebins, 1)
        timestamps - a 2D array of with the detected timestamps
-                    shape: (n_detections, 2)
+                    units: minutes, shape: (n_detections, 2)
        probs - a vector of ad probabilities for each detection, calculated only
                based on music vs. ad classifier
                (gives high probability for speech), shape: (n_detection,)
